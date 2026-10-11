@@ -1,4 +1,36 @@
 -- CTE : COMMON TABLE EXPRESSION
+/*
+CTE (Common Table Expression)
+
+Definition:
+A CTE is a temporary, named result set that can be used multiple times
+within a single SQL statement.
+
+Advantages of CTE:
+1. Readability:
+   Breaks down complex queries into smaller pieces.
+
+2. Modularity:
+   Makes queries easier to manage, develop, and maintain.
+
+3. Reusability:
+   Helps avoid repeating the same query logic within a query.
+
+4. Recursive:
+   Supports recursive operations, such as working with hierarchical
+   data using recursive CTEs.
+
+Important Notes:
+- A CTE behaves like a temporary result set, similar to a table.
+- A CTE is available only to the single SQL statement immediately
+  following its definition.
+- A CTE cannot be directly reused across multiple separate queries.
+- CTEs do not automatically store results permanently.
+
+Tip:
+Try to keep the number of CTEs manageable (for example, 5 or fewer)
+to maintain readability. This is a guideline, not a SQL Server rule.
+*/
 -- Temporaray named result set(Virtual tables) that can be used multiple times within your query to simply and organize your query
 -- why to use : READABILITY , MODULARITY, REUSABILITY
 
