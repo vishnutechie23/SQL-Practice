@@ -167,16 +167,3 @@ CREATE NONCLUSTERED INDEX idx_Customers_Country
 ON Sales.Customers (Country)
 WHERE Country = 'USA'
 
-/*
-USE AdventureWorksDW2025;
-
--- Show all tables
-SELECT *
-FROM INFORMATION_SCHEMA.TABLES
-WHERE TABLE_TYPE = 'BASE TABLE';
-
-SELECT *
-FROM FactInternetSales
-ORDER BY ProductKey 
-*/
-
