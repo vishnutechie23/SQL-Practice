@@ -163,4 +163,3 @@ WHERE OrderDate IN ('2026-01-01', '2025-12-31')
 SELECT * FROM Sales.Orders_NoPartition
 WHERE OrderDate = '2026-01-01'
 -- actual no of rows read - 4
-
