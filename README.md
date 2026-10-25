@@ -12,13 +12,8 @@ I started learning SQL through the following YouTube tutorial and practiced the 
 
 \### Learning Resource
 
-
-
 \[SQL Tutorial – YouTube](https://youtu.be/SSKVgrwhzus)
 
 
 
 This repository documents my learning journey and hands-on SQL practice.
-
-
-
