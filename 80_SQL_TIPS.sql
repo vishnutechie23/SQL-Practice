@@ -295,3 +295,10 @@ FROM (
 	UNION ALL
 	SELECT CustomerID FROM Sales.OrdersArchive
 	) AS CombineData
+
+
+--==========================================
+-- Aggregating DATA
+-- TIP 17 : Use Columnstore (compress) index for aggregation large table 
+--==========================================
+
