@@ -179,3 +179,119 @@ ON c.CustomerID = o.CustomerID
 WHERE o.OrderStatus = 'Delivered'
 
 -- Filter During JOIN (ON)
+SELECT c.FirstName, o.OrderID
+FROM Sales.Customers c
+INNER JOIN Sales.Orders o
+ON c.CustomerID = o.CustomerID
+AND o.OrderStatus = 'Delivered'
+
+-- Filter Before Join (SUBQUERY) : For large table
+SELECT c.FirstName, o.OrderID
+FROM Sales.Customers c
+INNER JOIN (SELECT OrderID, CustomerID FROM Sales.Orders WHERE OrderStatus = 'Delivered') o -- Try to isolate the preparation step in a CTE or subquery
+ON c.CustomerID = o.customerID
+
+--==========================================
+-- TIP 12 : Aggregate before joining (Big tables)
+--==========================================
+
+-- Best Practice for small-medium Tables
+-- Grouping and joining
+SELECT c.CustomerID, c.FirstName, COUNT(o.OrderID) AS OrderCount
+FROM Sales.Customers c
+INNER JOIN Sales.Orders o
+ON c.CustomerID = o.CustomerID
+GROUP BY c.CustomerID, c.FirstName
+
+-- Best practiec for Big tables
+-- Pre-aggregated subquery
+SELECT c.CustomerID, c.FirstName, o.OrderCount
+FROM Sales.Customers c
+INNER JOIN (
+	SELECT CustomerID, COUNT(OrderID) AS OrderCount
+	FROM Sales.Orders
+	GROUP BY CustomerID
+) o
+ON c.CustomerID = o.CustomerID
+
+-- Bad practice
+-- Corelated  subquery (Coreleted queries are inefficient cuz SQL execute aggregations for every row)
+SELECT
+	c.CustomerID,
+	c.FirstName,
+	(SELECT COUNT(o.OrderID)
+	FROM Sales.Orders o
+	WHERE o.CustomerID = o.CustomerID) AS OrderCount
+FROM Sales.Customers c
+
+
+--==========================================
+-- TIP 13 : Use Union Instead of OR in Joins
+--==========================================
+
+-- Bad practice
+
+SELECT o.OrderID, c.FirstName
+FROM Sales.Customers c
+INNER JOIN Sales.Orders o
+ON c.CustomerID = o.CustomerID
+OR c.CustomerID = o.SalesPersonID
+
+-- Best practice
+
+SELECT o.OrderID, c.FirstName
+FROM Sales.Customers c
+INNER JOIN Sales.Orders o
+ON c.CustomerID = o.CustomerID
+UNION
+SELECT o.OrderID, c.FirstName
+FROM Sales.Customers c
+INNER JOIN Sales.Orders o
+ON c.CustomerID = o.SalesPersonID
+
+--==========================================
+-- TIP 14 : Check for Nested loops & Use SQL HIINTS
+--==========================================
+
+SELECT o.OrderID, c.FirstName
+FROM Sales.Customers c
+INNER JOIN Sales.Orders o
+ON c.CustomerID = o.CustomerID
+
+-- Good practice for having big table and small table
+SELECT o.OrderID, c.FirstName
+FROM Sales.Customers c
+INNER JOIN Sales.Orders o
+ON c.CustomerID = o.CustomerID
+OPTION (HASH JOIN)
+
+--==========================================
+-- TIP 15 : Use UNION ALL instead of using UNION | duplicates are acceptable
+--==========================================
+
+-- Bad practice
+SELECT CustomerID FROM Sales.Orders
+UNION
+SELECT CustomerID FROM Sales.OrdersArchive
+
+-- Best Practice
+SELECT CustomerID FROM Sales.Orders
+UNION ALL
+SELECT CustomerID FROM Sales.OrdersArchive
+
+--==========================================
+-- TIP 16 : USe UNION ALL + DISTINCT instead of using UNION | duplicates are not acceptable
+--==========================================
+
+-- Bad practice
+SELECT CustomerID FROM Sales.Orders
+UNION 
+SELECT CustomerID FROM Sales.OrdersArchive
+
+-- Best pratice
+SELECT DISTINCT CustomerID
+FROM (
+	SELECT CustomerID FROM Sales.Orders
+	UNION ALL
+	SELECT CustomerID FROM Sales.OrdersArchive
+	) AS CombineData
