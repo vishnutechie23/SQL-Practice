@@ -424,3 +424,107 @@ SELECT
 		ELSE 'Average'
 	END AS Status
 FROM Sales.Employees
+
+
+-- Creating tables 
+-- table
+
+CREATE TABLE CustomersInfo (
+	CustomerID INT,
+	FirstName VARCHAR(MAX),
+	LastName TEXT,
+	Country VARCHAR(255),
+	TotalPurchases FLOAT,
+	Score VARCHAR(255),
+	Birthdate VARCHAR(255),
+	EmployeeID INT,
+	CONSTRAINT FK_CustomersInfo_EmployeeID FOREIGN KEY (EmployeeID)
+		REFERENCES Sales.Employees(EmployeeID)
+
+-- TIP 21 : Avoid using VARCHAR & TEXT : VARCHAR is better than TEXT
+
+CREATE TABLE CustomersInfo (
+	CustomerID INT,
+	FirstName VARCHAR(MAX),
+	LastName VARCHAR(50),
+	Country VARCHAR(255),
+	TotalPurchases FLOAT,
+	Score INT,
+	Birthdate DATE,
+	EmployeeID INT,
+	CONSTRAINT FK_CustomersInfo_EmployeeID FOREIGN KEY (EmployeeID)
+		REFERENCES Sales.Employees(EmployeeID)
+)
+
+-- TIP 22 : Avoid using (MAX) Unnecessarily large lengths in data types
+CREATE TABLE CustomersInfo (
+	CustomerID INT,
+	FirstName VARCHAR(50),
+	LastName VARCHAR(50),
+	Country VARCHAR(50),
+	TotalPurchases FLOAT,
+	Score INT,
+	Birthdate DATE,
+	EmployeeID INT,
+	CONSTRAINT FK_CustomersInfo_EmployeeID FOREIGN KEY (EmployeeID)
+		REFERENCES Sales.Employees(EmployeeID)
+)
+
+-- TIP 23 : Use the NOT NULL Constraint where applicable
+CREATE TABLE CustomersInfo (
+	CustomerID INT,
+	FirstName VARCHAR(50) NOT NULL,
+	LastName VARCHAR(50) NOT NULL,
+	Country VARCHAR(50) NOT NULL,
+	TotalPurchases FLOAT,
+	Score INT,
+	Birthdate DATE,
+	EmployeeID INT,
+	CONSTRAINT FK_CustomersInfo_EmployeeID FOREIGN KEY (EmployeeID)
+		REFERENCES Sales.Employees(EmployeeID)
+)
+
+-- TIP 24 : Ensure all your tables have a clustered PK
+CREATE TABLE CustomersInfo (
+	CustomerID INT PRIMARY KEY CLUSTERED,
+	FirstName VARCHAR(50),
+	LastName VARCHAR(50),
+	Country VARCHAR(50),
+	TotalPurchases FLOAT,
+	Score INT,
+	Birthdate DATE,
+	EmployeeID INT,
+	CONSTRAINT FK_CustomersInfo_EmployeeID FOREIGN KEY (EmployeeID)
+		REFERENCES Sales.Employees(EmployeeID)
+)
+
+-- TIP 25 : Create Non-Clustered index for foreign keys that are used frequently
+
+CREATE TABLE CustomersInfo (
+	CustomerID INT PRIMARY KEY CLUSTERED,
+	FirstName VARCHAR(50),
+	LastName VARCHAR(50),
+	Country VARCHAR(50),
+	TotalPurchases FLOAT,
+	Score INT,
+	Birthdate DATE,
+	EmployeeID INT,
+	CONSTRAINT FK_CustomersInfo_EmployeeID FOREIGN KEY (EmployeeID)
+		REFERENCES Sales.Employees(EmployeeID)
+)
+
+CREATE NONCLUSTERED INDEX IX_CustomersInfo_EmployeeID ON CustomersInfo(EmployeeID)
+
+
+-- INDEXING
+-- TIP 26 : Avoid over indexing
+-- TIP 27 : Drop unused indexes
+-- TIP 28 : Update statistics (weekly)
+-- TIP 29 : reorganize & rebuild Indexes (weekly)
+-- TIP 30 : Partition large tables (Facts) to improve performance Next, apply a columnstore index for the best results
+
+/*
+Focus on writing clear queries
+Optimize performance only when necessary
+Always Test using Execution plan
+*/
