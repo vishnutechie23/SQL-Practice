@@ -302,3 +302,125 @@ FROM (
 -- TIP 17 : Use Columnstore (compress) index for aggregation large table 
 --==========================================
 
+SELECT CustomerID, COUNT(OrderID) AS OrderCount
+FROM Sales.Orders
+GROUP BY CustomerID
+
+CREATE CLUSTERED COLUMNSTORE INDEX Idx_Orders_Columnstore ON Sales.Orders
+
+-- show all indexes
+EXEC sp_helpindex 'Sales.Orders';
+
+-- make copy
+SELECT *
+INTO Sales.Orders_Columnstore
+FROM Sales.Orders;
+
+CREATE CLUSTERED COLUMNSTORE INDEX Idx_Orders_Columnstore ON Sales.Orders_Columnstore;
+
+SELECT COUNT(*)
+FROM Sales.Orders_Columnstore;
+
+EXEC sp_helpindex 'Sales.Orders_Columnstore';
+
+CREATE CLUSTERED COLUMNSTORE INDEX Idx_Orders_Columnstore ON Sales.Orders_Columnstore;
+
+
+
+-- Memory check
+SELECT
+    name,
+    value_in_use
+FROM sys.configurations
+WHERE name IN (
+    'max server memory (MB)',
+    'min server memory (MB)',
+    'max degree of parallelism'
+);
+
+-- version check 
+SELECT @@VERSION;
+
+SELECT
+    total_physical_memory_kb / 1024 AS TotalRAM_MB,
+    available_physical_memory_kb / 1024 AS AvailableRAM_MB,
+    system_memory_state_desc
+FROM sys.dm_os_sys_memory;
+
+SELECT
+    physical_memory_in_use_kb / 1024 AS SQL_Memory_Used_MB,
+    available_commit_limit_kb / 1024 AS Available_Commit_Limit_MB,
+    process_physical_memory_low,
+    process_virtual_memory_low
+FROM sys.dm_os_process_memory;
+
+
+--==========================================
+-- TIP 18 : Pre-Aggregate Data and store it in new Table for Reporting
+--==========================================
+
+SELECT MONTH(OrderDate) OrderYear, SUM(Sales) AS TotalSales
+INTO Sales.SalesSummary
+FROM sales.Orders
+GROUP BY MONTH(OrderDate)
+
+SELECT OrderYear, TotalSales FROM Sales.SalesSummary
+
+
+--==========================================
+-- SUBQUERIES
+-- TIP 19 : JOIN vs EXISTS vs IN
+--==========================================
+
+-- EXISTS bettern tahn JOIN cuz it stops at first match & avoid data duplication
+
+-- JOIN (Best practice if the performance is equal  to EXISTS)
+SELECT o.OrderID, o.Sales
+FROM Sales.Orders o
+INNER JOIN Sales.Customers c
+ON o.CustomerID = c.CustomerID
+WHERE c.Country = 'USA'
+
+-- EXISTS (BEst practice : Use it for large tables)
+SELECT o.OrderID, o.Sales
+FROM Sales.Orders o
+WHERE EXISTS (
+	SELECT 1 
+	FROM Sales.Customers c
+	WHERE c.CustomerID = o.CustomerID
+	AND c.Country = 'USA'
+)
+
+-- IN (Bad practice) : The IN operator processes & evaluates all rows. It lacks an early exit mechanism
+SELECT o.OrderID, o.Sales
+FROM Sales.Orders o
+WHERE o.CustomerID IN (
+	SELECT CustomerID
+	FROM Sales.Customers
+	WHERE Country = 'USA'
+	)
+
+--==========================================
+-- TIP 20 : Avoid Redundant Logic in your query
+--==========================================
+
+-- Bad practice
+SELECT EmployeeID, FirstName, 'Above Average' Status
+FROM Sales.Employees
+WHERE Salary > (SELECT AVG(Salary) FROM Sales.Employees )
+UNION ALL
+SELECT EmployeeID, FirstName, 'Below Average' Status
+FROM Sales.Employees
+WHERE Salary < (SELECT AVG(Salary) FROM Sales.Employees)
+ORDER BY EmployeeID
+
+-- Good practice
+SELECT
+	EmployeeID,
+	FirstName,
+	CASE 
+		WHEN Salary > AVG(Salary) OVER() THEN 'Above Average'
+		WHEN Salary < AVG(Salary) OVER() THEN 'Below Average'
+		ELSE 'Average'
+	END AS Status
+FROM Sales.Employees
